@@ -1,0 +1,38 @@
+.signup-container {
+  background: linear-gradient(to right, #ff7e5f, #feb47b);
+  color: #fff;
+}
+
+.signup-form {
+  background: #fff;
+  color: #333;
+  border-radius: 10px;
+}
+
+.signup-form h2 {
+  font-weight: bold;
+  color: #ff7e5f;
+}
+
+.signup-form .form-label {
+  font-weight: 500;
+}
+
+.signup-form .btn-primary {
+  background: #ff7e5f;
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.signup-form .btn-primary:hover {
+  background: #feb47b;
+}
+
+.signup-form a {
+  color: #ff7e5f;
+  transition: color 0.3s ease;
+}
+
+.signup-form a:hover {
+  color: #feb47b;
+}

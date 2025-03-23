@@ -1,0 +1,38 @@
+.login-container {
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: #fff;
+}
+
+.login-form {
+  background: #fff;
+  color: #333;
+  border-radius: 10px;
+}
+
+.login-form h2 {
+  font-weight: bold;
+  color: #6a11cb;
+}
+
+.login-form .form-label {
+  font-weight: 500;
+}
+
+.login-form .btn-primary {
+  background: #6a11cb;
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.login-form .btn-primary:hover {
+  background: #2575fc;
+}
+
+.login-form a {
+  color: #6a11cb;
+  transition: color 0.3s ease;
+}
+
+.login-form a:hover {
+  color: #2575fc;
+}
