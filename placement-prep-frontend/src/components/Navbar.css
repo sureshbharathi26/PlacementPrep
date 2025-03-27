@@ -1,5 +1,8 @@
 .navbar {
   transition: all 0.3s ease-in-out;
+  top: 0;
+  width: 100%;
+  z-index: 1030; /* Ensure it stays above other elements */
 }
 
 .navbar-brand {

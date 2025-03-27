@@ -1,11 +1,12 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
-const db = require('../backend/config/db'); // Import the database connection
+const db = require('./config/db'); // Import the database connection
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companyRoutes');
 const testRoutes = require('./routes/testRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
+const testController = require('./controllers/testController');
+const authMiddleware = require('./middlewares/authMiddleware');
 
 // Initialize Express app
 const app = express();
@@ -20,6 +21,9 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/tests', testRoutes);
+
+// Protect the route with authMiddleware
+app.get('/api/tests/:companyId/:round', authMiddleware, testController.getQuestionsByCompanyAndRound);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

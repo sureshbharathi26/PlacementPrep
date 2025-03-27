@@ -1,11 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../services/api';
 
 export const fetchQuestions = createAsyncThunk(
   'test/fetchQuestions',
-  async ({ companyId, round }) => {
-    const response = await axios.get(`/api/tests/${companyId}/${round}`);
-    return response.data;
+  async ({ companyId, round }, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/tests/${companyId}/${round}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch questions');
+    }
   }
 );
 
@@ -14,16 +18,22 @@ const testSlice = createSlice({
   initialState: {
     questions: [],
     loading: false,
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchQuestions.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchQuestions.fulfilled, (state, action) => {
-        state.questions = action.payload;
         state.loading = false;
+        state.questions = action.payload;
+      })
+      .addCase(fetchQuestions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

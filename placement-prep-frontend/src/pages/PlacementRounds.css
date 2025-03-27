@@ -1,0 +1,142 @@
+.progress-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.placement-rounds-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.progress-bar-vertical {
+  position: relative;
+  width: 50px;
+  height: 400px;
+  background-color: #e0e0e0;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 50px; /* Add gap between dots */
+}
+
+.progress-step:last-child {
+  margin-bottom: 0; /* Remove margin for the last dot */
+}
+
+.progress-dot {
+  width: 40px;
+  height: 40px;
+  background-color: #007bff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease-in-out;
+}
+
+.progress-step.active .progress-dot {
+  background-color: #28a745;
+}
+
+.progress-dot:hover {
+  transform: scale(1.2);
+}
+
+.cleared-dot {
+  background-color: #28a745 !important; /* Green color for cleared rounds */
+  color: white;
+}
+
+.progress-label {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.rounds-text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 400px;
+}
+
+.round-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.2s ease-in-out;
+}
+
+.round-text:hover {
+  color: #007bff;
+}
+
+.round-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .placement-rounds-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .progress-bar-vertical {
+    width: 40px;
+    height: 300px;
+  }
+
+  .progress-dot {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  .rounds-text-container {
+    align-items: center;
+    text-align: center;
+    height: auto;
+  }
+
+  .round-text {
+    font-size: 1rem;
+  }
+
+  .round-description {
+    font-size: 0.8rem;
+  }
+}
+
+.status-cleared {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #28a745; /* Green color for success */
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.status-icon {
+  font-size: 18px;
+}

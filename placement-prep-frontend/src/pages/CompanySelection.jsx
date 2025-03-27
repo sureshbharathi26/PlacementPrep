@@ -17,29 +17,33 @@ const CompanySelection = () => {
   return (
     <>
       <Navbar />
-      <div className="container mt-5">
-        <h1 className="text-center mb-4">Select a Company</h1>
-
+      <div className="container mt-5" style={{ position: 'absolute', marginTop: '6rem',marginLeft:'7rem' }}>
+        <h1 className="text-center mt-5 mb-5">Select a Company</h1>
+        {/* Increased margin-bottom from mb-4 to mb-5 */}
         {loading && <p className="text-center mt-5">Loading...</p>}
         {error && <p className="text-center mt-5 text-danger">Error: {error}</p>}
 
         {!loading && !error && (
-          <ul className="list-group">
+          <div className="row">
             {companies?.length > 0 ? (
               companies.map((company) => (
-                <li
+                <div
                   key={company.id}
-                  className="list-group-item"
+                  className="col-md-4 mb-4"
                   onClick={() => navigate(`/placement-rounds/${company.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
-                  {company.name}
-                </li>
+                  <div className="card shadow-sm h-100">
+                    <div className="card-body text-center">
+                      <h5 className="card-title">{company.name}</h5>
+                    </div>
+                  </div>
+                </div>
               ))
             ) : (
               <p className="text-center mt-3">No companies available</p>
             )}
-          </ul>
+          </div>
         )}
       </div>
     </>

@@ -2,21 +2,54 @@ const db = require('../config/db');
 
 const getQuestionsByCompanyAndRound = (req, res) => {
   const { companyId, round } = req.params;
+
+  console.log('Received params:', { companyId, round });
+
+  if (!companyId || !round) {
+    return res.status(400).json({
+      error: 'Missing company ID or round parameter',
+    });
+  }
+
   db.query(
-    'SELECT * FROM questions WHERE company_id = ? AND round = ?',
-    [companyId, round],
+    `SELECT id, question, options, answer AS correct_answer 
+     FROM questions 
+     WHERE company_id = ? AND round = ?`,
+    [companyId, round.toLowerCase()],
     (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(result);
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+          error: 'Database query failed',
+          details: err.message,
+        });
+      }
+
+      if (!result || result.length === 0) {
+        return res.status(404).json({
+          message: 'No questions found for this round',
+          params: { companyId, round },
+        });
+      }
+
+      try {
+        const formattedResult = result.map((q) => ({
+          id: q.id,
+          question: q.question,
+          options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+          correctAnswer: q.correct_answer,
+        }));
+
+        res.json(formattedResult);
+      } catch (parseError) {
+        console.error('Options parsing error:', parseError);
+        res.status(500).json({
+          error: 'Failed to parse question options',
+          details: parseError.message,
+        });
+      }
     }
   );
 };
 
-const submitTest = (req, res) => {
-  const { userId, companyId, round, answers } = req.body;
-  // Validate answers and calculate score
-  // Save results to the database
-  res.json({ message: 'Test submitted successfully' });
-};
-
-module.exports = { getQuestionsByCompanyAndRound, submitTest };
+module.exports = { getQuestionsByCompanyAndRound };
