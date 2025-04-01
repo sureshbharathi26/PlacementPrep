@@ -1,0 +1,100 @@
+/* Container styling */
+.signup-container {
+    background: linear-gradient(to right, #ff6a00, #ee0979);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  /* Form card styling */
+  .signup-form {
+    background: #ffffff;
+    color: #333;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 420px;
+    animation: fadeIn 0.7s ease-in-out;
+  }
+  
+  /* Heading styling */
+  .signup-form h2 {
+    font-weight: 700;
+    color: #ee0979;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+  
+  /* Label styling */
+  .signup-form .form-label {
+    font-weight: 600;
+    color: #444;
+  }
+  
+  /* Input field styling */
+  .signup-form .form-control {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    transition: all 0.3s ease;
+  }
+  
+  .signup-form .form-control:focus {
+    border-color: #ee0979;
+    box-shadow: 0 0 8px rgba(238, 9, 121, 0.5);
+  }
+  
+  /* Button styling */
+  .signup-form .btn-primary {
+    background: #ee0979;
+    border: none;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 6px;
+  }
+  
+  .signup-form .btn-primary:hover {
+    background: #ff6a00;
+    transform: scale(1.05);
+  }
+  
+  /* Link styling */
+  .signup-form a {
+    color: #ee0979;
+    transition: color 0.3s ease;
+    text-decoration: none;
+  }
+  
+  .signup-form a:hover {
+    color: #ff6a00;
+    text-decoration: underline;
+  }
+  
+  /* Fade-in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsive styling */
+  @media (max-width: 576px) {
+    .signup-form {
+      padding: 25px;
+    }
+  
+    .signup-form h2 {
+      font-size: 1.6rem;
+    }
+  }
+  

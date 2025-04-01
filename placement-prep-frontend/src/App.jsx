@@ -15,12 +15,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Login />} /> {/* Default route is now Login */}
+        <Route path="/login" element={<Login />} /> {/* Default route is now Login */}
+        <Route path="/home" element={<Home />} /> {/* Home page moved to /home */}
         <Route path="/company" element={<CompanySelection />} />
-        <Route path="/placement-rounds/:id" element={<PlacementRounds />} />  {/* ✅ Dynamic ID */}
-        <Route path="/test/:companyId/:round" element={<TestPage />} />  {/* ✅ Dynamic Test */}
-        <Route path="/results" element={<ResultPage />} /> {/* New ResultPage route */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/placement-rounds/:id" element={<PlacementRounds />} />
+        <Route path="/test/:companyId/:round" element={<TestPage />} />
+        <Route path="/results" element={<ResultPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/code-compiler/:companyId" element={<CodeCompiler />} />

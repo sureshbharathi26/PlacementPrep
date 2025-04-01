@@ -26,35 +26,58 @@ const Navbar2 = ({
     { value: "light", label: "Light" },
   ];
   return (
-    <div className="Navbar">
-      <div className="leftDiv">
-        <div className="title">CodeLab</div>
-        <Select
-          options={languages}
-          value={userLanguage}
-          onChange={(e) => setUserLanguage(e.value)}
-          placeholder={userLanguage}
-          width="40px"
-        />
-        <Select
-          options={themes}
-          value={userTheme}
-          onChange={(e) => setUserTheme(e.value)}
-          placeholder={userTheme}
-        />
-      </div>
-      <div className="rightDiv">
-        <label>Font Size</label>
-        <input
-          type="range"
-          min="16"
-          max="30"
-          value={fontSize}
-          step="1"
-          onChange={(e) => {
-            setFontSize(e.target.value);
-          }}
-        />
+    <div className="navbar navbar-expand-lg navbar-light" style={{ backgroundColor: "#007bff", color: "#fff" }}>
+      <div className="container-fluid d-flex justify-content-between align-items-center">
+        <div className="d-flex align-items-center gap-3">
+          <h4 className="text-white mb-0">CodeLab</h4>
+          <Select
+            options={languages}
+            value={languages.find((lang) => lang.value === userLanguage)}
+            onChange={(e) => setUserLanguage(e.value)}
+            placeholder="Select Language"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: "#ffffff",
+                borderColor: "#0056b3",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: "#333",
+              }),
+            }}
+          />
+          <Select
+            options={themes}
+            value={themes.find((theme) => theme.value === userTheme)}
+            onChange={(e) => setUserTheme(e.value)}
+            placeholder="Select Theme"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: "#ffffff",
+                borderColor: "#0056b3",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: "#333",
+              }),
+            }}
+          />
+        </div>
+        <div className="d-flex align-items-center gap-3">
+          <label className="text-white mb-0">Font Size</label>
+          <input
+            type="range"
+            min="16"
+            max="30"
+            value={fontSize}
+            step="1"
+            onChange={(e) => setFontSize(e.target.value)}
+            className="form-range"
+            style={{ width: "150px" }}
+          />
+        </div>
       </div>
     </div>
   );

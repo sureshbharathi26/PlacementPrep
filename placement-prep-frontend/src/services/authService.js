@@ -8,7 +8,7 @@ const register = async (userData) => {
 const login = async (userData) => {
   const response = await api.post('/api/auth/login', userData);
   if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('token', response.data.token); // Save token to localStorage
   }
   return response.data;
 };

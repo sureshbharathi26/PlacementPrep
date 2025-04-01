@@ -1,13 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./config/db'); // Import the database connection
-const authRoutes = require('./routes/authRoutes');
-const companyRoutes = require('./routes/companyRoutes');
-const testRoutes = require('./routes/testRoutes');
-const errorMiddleware = require('./middlewares/errorMiddleware');
-const testController = require('./controllers/testController');
-const authMiddleware = require('./middlewares/authMiddleware');
-
+const db = require('./config/db.js'); // Import the database connection
+const authRoutes = require('./routes/authRoutes.js');
+const companyRoutes = require('./routes/companyRoutes.js');
+const testRoutes = require('./routes/testRoutes.js');
+const errorMiddleware = require('./middlewares/errorMiddleware.js');
+const testController = require('./controllers/testController.js');
+const authMiddleware = require('./middlewares/authMiddleware.js');
+const dotenv = require('dotenv');
+dotenv.config(); // Load environment variables from .env file
 // Initialize Express app
 const app = express();
 

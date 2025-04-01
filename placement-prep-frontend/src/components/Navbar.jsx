@@ -1,37 +1,47 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './Navbar.css'; // Import CSS for additional styling
+import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
   const [activePage, setActivePage] = useState(location.pathname);
+  const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(true); // State to manage navbar collapse
 
   const handleNavClick = (path) => {
     setActivePage(path);
+    setIsNavbarCollapsed(true); // Collapse the navbar after clicking a link
+  };
+
+  const toggleNavbar = () => {
+    setIsNavbarCollapsed(!isNavbarCollapsed); // Toggle the navbar state
   };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div className="container-fluid">
-        <Link className="navbar-brand fw-bold" to="/">PlacementPrep</Link>  
+        <Link className="navbar-brand fw-bold" to="/home">
+          PlacementPrep
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
+          onClick={toggleNavbar} // Toggle the navbar on click
           aria-controls="navbarNav"
-          aria-expanded="false"
+          aria-expanded={!isNavbarCollapsed} // Dynamically set aria-expanded
           aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
+        <div
+          className={`collapse navbar-collapse ${isNavbarCollapsed ? '' : 'show'}`} // Dynamically add 'show' class
+          id="navbarNav"
+        >
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
               <Link
-                className={`nav-link ${activePage === '/' ? 'active-link' : ''}`}
-                to="/"
-                onClick={() => handleNavClick('/')}
+                className={`nav-link ${activePage === '/home' ? 'active-link' : ''}`}
+                to="/home"
+                onClick={() => handleNavClick('/home')}
               >
                 Home
               </Link>

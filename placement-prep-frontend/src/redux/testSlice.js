@@ -6,8 +6,10 @@ export const fetchQuestions = createAsyncThunk(
   async ({ companyId, round }, { rejectWithValue }) => {
     try {
       const response = await api.get(`/api/tests/${companyId}/${round}`);
+      console.log("API Response:", response.data); // Log the API response
       return response.data;
     } catch (error) {
+      console.error("API Error:", error); // Log any errors
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch questions');
     }
   }

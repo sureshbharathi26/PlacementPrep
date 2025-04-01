@@ -23,22 +23,44 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.length === 0) return res.status(400).json({ error: 'User not found' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
 
-    const user = result[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, result) => {
+      if (err) {
+        console.error('Database error:', err); // Log database errors
+        return res.status(500).json({ error: 'Internal server error' });
+      }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+      if (result.length === 0) {
+        return res.status(400).json({ error: 'User not found' });
+      }
+
+      const user = result[0];
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+      }
+
+      if (!process.env.JWT_SECRET) {
+        console.error('JWT_SECRET is not defined'); // Log missing JWT_SECRET
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+      });
+
+      res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     });
-
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-  });
+  } catch (error) {
+    console.error('Unexpected error:', error); // Log unexpected errors
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
+
 
 module.exports = { register, login };

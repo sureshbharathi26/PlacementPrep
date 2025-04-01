@@ -51,6 +51,13 @@ const TestPage = () => {
   };
 
   const handleSubmitTest = () => {
+    const answeredQuestions = Object.keys(answers).length;
+    if (answeredQuestions === 0) {
+      alert("You have ended the test without selecting any options.");
+      navigate(`/placement-rounds/${companyId}`);
+      return;
+    }
+
     const correctAnswers = questions.filter(
       (q) => q.correctAnswer === answers[q.id]
     ).length;
@@ -91,6 +98,16 @@ const TestPage = () => {
     }
   };
 
+  const handleEndTest = () => {
+    if (window.confirm("Are you sure you want to end the test?")) {
+      handleSubmitTest();
+    }
+  };
+
+  const handleBackToRounds = () => {
+    navigate(`/placement-rounds/${companyId}`);
+  };
+
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -110,9 +127,14 @@ const TestPage = () => {
               <p className="mb-0">
                 <strong>Time Remaining:</strong> {formatTime(timer)}
               </p>
-              <p className="mb-0">
-                <strong>Question:</strong> {currentQuestionIndex + 1} / {questions.length}
-              </p>
+              <div>
+                <button className="btn btn-secondary me-2" onClick={handleBackToRounds}>
+                  Back
+                </button>
+                <button className="btn btn-danger" onClick={handleEndTest}>
+                  End Test
+                </button>
+              </div>
             </div>
             <div className="progress mb-4" style={{ height: '10px' }}>
               <div
