@@ -1,0 +1,423 @@
+:root {
+    --primary-color: #4e54c8;
+    --secondary-color: #8f94fb;
+    --dark-color: #1a1a2e;
+    --darker-color: #16213e;
+    --light-color: #f5f5f5;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --text-color: #333;
+    --text-light: #777;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  body {
+    background-color: #f8f9fa;
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+  
+  .mock-interview-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .interview-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--dark-color);
+  }
+  
+  .interview-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .interview-header p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+  }
+  
+  .interview-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .question-section {
+    margin-bottom: 2rem;
+  }
+  
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .question-count {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .timer {
+    background: var(--darker-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .question-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .visualization-section {
+    margin: 2rem 0;
+    position: relative;
+  }
+  
+  .voice-spectrum {
+    width: 100%;
+    height: 150px;
+    background: var(--dark-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  
+  .pulse-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    color: var(--text-light);
+  }
+  
+  .pulse-indicator.active {
+    color: var(--primary-color);
+  }
+  
+  .pulse-circle {
+    width: 12px;
+    height: 12px;
+    background: #ccc;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .pulse-indicator.active .pulse-circle {
+    background: var(--danger-color);
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(244, 67, 54, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
+    }
+  }
+  
+  .answer-section {
+    margin: 2rem 0;
+  }
+  
+  .answer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .answer-header h3 {
+    color: var(--dark-color);
+  }
+  
+  .recording-controls {
+    display: flex;
+    align-items: center;
+  }
+  
+  .btn-record {
+    background: white;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-record:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+  
+  .btn-record.active {
+    background: var(--primary-color);
+    color: white;
+  }
+  
+  .recording-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--danger-color);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1.5s infinite;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .answer-text {
+    min-height: 100px;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-color);
+  }
+  
+  .answer-text p {
+    white-space: pre-wrap;
+  }
+  
+  .placeholder {
+    color: var(--text-light);
+    font-style: italic;
+  }
+  
+  .navigation-buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .btn-next {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-next:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .btn-next:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .responses-section {
+    margin-top: 2rem;
+  }
+  
+  .responses-section h3 {
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--secondary-color);
+  }
+  
+  .responses-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .response-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+  }
+  
+  .response-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .response-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .response-number {
+    background: var(--dark-color);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  .response-duration {
+    color: var(--text-light);
+    font-size: 0.9rem;
+  }
+  
+  .response-question {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+  }
+  
+  .response-answer {
+    color: var(--text-color);
+    font-size: 0.95rem;
+  }
+  
+  .completion-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+  }
+  
+  .completion-card {
+    background: white;
+    border-radius: 10px;
+    padding: 3rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .completion-card h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+  
+  .completion-card p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+  }
+  
+  .btn-restart {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-restart:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(78, 84, 200, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .error-message {
+    text-align: center;
+    padding: 2rem;
+    background: #ffecec;
+    border-radius: 8px;
+    border-left: 4px solid var(--danger-color);
+    margin: 2rem auto;
+    max-width: 500px;
+  }
+  
+  .error-message h3 {
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .mock-interview-container {
+      padding: 1rem;
+    }
+    
+    .interview-header h1 {
+      font-size: 2rem;
+    }
+    
+    .interview-card {
+      padding: 1.5rem;
+    }
+    
+    .question-text, .answer-text {
+      font-size: 1rem;
+    }
+    
+    .btn-record, .btn-next {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+  }

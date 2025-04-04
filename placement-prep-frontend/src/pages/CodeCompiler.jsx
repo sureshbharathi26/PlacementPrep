@@ -47,10 +47,10 @@ function CodeCompiler() {
     const fetchCodingQuestions = async () => {
       try {
         const result = await dispatch(fetchQuestions({ companyId, round: "coding" })).unwrap();
-        console.log("Fetched Questions:", result); // Log the API response
+        console.log("Fetched Questions:", result); // Debug log
         setQuestions(result);
       } catch (error) {
-        console.error("Error fetching questions:", error); // Log any errors
+        console.error("Error fetching questions:", error); // Debug log
       }
     };
     fetchCodingQuestions();
@@ -209,6 +209,12 @@ function CodeCompiler() {
                   <div className="question-box">
                     <h5 className="mb-3" style={{ color: "#333" }}>Question {currentQuestionIndex + 1}:</h5>
                     <p className="mb-4" style={{ color: "#555" }}>{questions[currentQuestionIndex].question}</p>
+                    <div className="mt-3">
+                      <h6>Sample Input:</h6>
+                      <pre>{questions[currentQuestionIndex].sampleInput || 'No sample input available'}</pre>
+                      <h6>Sample Output:</h6>
+                      <pre>{questions[currentQuestionIndex].sampleOutput || 'No sample output available'}</pre>
+                    </div>
                     <div className="d-flex justify-content-between">
                       <button
                         className="btn btn-outline-primary"

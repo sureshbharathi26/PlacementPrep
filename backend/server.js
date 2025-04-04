@@ -9,6 +9,9 @@ const testController = require('./controllers/testController.js');
 const authMiddleware = require('./middlewares/authMiddleware.js');
 const dotenv = require('dotenv');
 dotenv.config(); // Load environment variables from .env file
+const questionRoutes = require('./routes/questionRoutes.js'); // Import question routes
+const roundStatusRoutes = require('./routes/roundStatusRoutes'); // Import round status routes
+
 // Initialize Express app
 const app = express();
 
@@ -22,6 +25,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/tests', testRoutes);
+app.use('/api/questions', questionRoutes); // Add question routes
+app.use('/api/round-status', roundStatusRoutes); // Add round status routes
 
 // Protect the route with authMiddleware
 app.get('/api/tests/:companyId/:round', authMiddleware, testController.getQuestionsByCompanyAndRound);

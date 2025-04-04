@@ -1,44 +1,63 @@
+/* Navbar.css */
 .navbar {
-  transition: all 0.3s ease-in-out;
-  top: 0;
-  width: 100%;
-  z-index: 1030; /* Ensure it stays above other elements */
+  padding: 0.8rem 0;
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+  background-color: rgba(33, 37, 41, 0.98) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand {
   font-size: 1.5rem;
-  color: #007bff;
-  transition: color 0.3s ease-in-out;
+  letter-spacing: 0.5px;
 }
 
-.navbar-brand:hover {
-  color: #0056b3;
+.brand-gradient {
+  background: linear-gradient(90deg, #4e73df, #224abe);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .nav-link {
-  font-size: 1rem;
-  color: #555;
-  transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
 }
 
 .nav-link:hover {
-  color: #007bff;
-  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.active-link {
-  color: #007bff;
-  font-weight: bold;
-  border-bottom: 2px solid #007bff;
+.nav-link.active {
+  background-color: rgba(78, 115, 223, 0.2);
+  color: #4e73df !important;
 }
+
 .navbar-toggler {
-  outline: none
+  border: none;
 }
 
-.navbar-toggler-icon {
-  border-radius: 2px;
-  width: 30px;
-  height: 30px;
-  display: block;
-  margin: 5px auto;
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+/* Add some padding to the body to account for fixed navbar */
+body {
+  padding-top: 70px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding: 1rem 0;
+  }
+  
+  .nav-item {
+    margin: 0.3rem 0;
+  }
 }

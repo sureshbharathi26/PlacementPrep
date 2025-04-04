@@ -1,21 +1,55 @@
-import React from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './PlacementRounds.css'; // Import custom CSS for the progress bar
 import { FaCheckCircle } from 'react-icons/fa'; // Import a professional checkmark icon
+import api from '../services/api'; // Import API service
 
 const PlacementRounds = () => {
   const { id: companyId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const roundStatus = location.state?.roundStatus || {};
+  const [roundStatus, setRoundStatus] = useState({});
 
-  const handleRoundClick = (round) => {
+  useEffect(() => {
+    const fetchRoundStatus = async () => {
+      try {
+        const response = await api.get('/api/round-status', {
+          params: { userId: localStorage.getItem('userId'), companyId },
+        });
+        const status = response.data.reduce((acc, round) => {
+          acc[round.round_name] = round.status;
+          return acc;
+        }, {});
+        setRoundStatus(status);
+      } catch (error) {
+        console.error('Failed to fetch round status:', error);
+      }
+    };
+
+    fetchRoundStatus();
+  }, [companyId]);
+
+  const handleRoundClick = async (round) => {
     if (round === 'coding') {
       navigate(`/code-compiler/${companyId}`);
+    } else if (round === 'interview') {
+      navigate('/mock-interview'); // Navigate to MockInterview for Round 3
     } else {
       navigate(`/test/${companyId}/${round}`);
+    }
+
+    // Update round status to 'cleared' after completion
+    try {
+      await api.post('/api/round-status', {
+        userId: localStorage.getItem('userId'),
+        companyId,
+        roundName: round,
+        status: 'cleared',
+      });
+      setRoundStatus((prev) => ({ ...prev, [round]: 'cleared' }));
+    } catch (error) {
+      console.error('Failed to update round status:', error);
     }
   };
 

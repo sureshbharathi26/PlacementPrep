@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AboutUs from './pages/AboutUs';
 import CodeCompiler from './pages/CodeCompiler';
+import MockInterview from './components/MockInterview';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/code-compiler/:companyId" element={<CodeCompiler />} />
+        <Route path="/mock-interview" element={<MockInterview />} />
       </Routes>
     </Router>
   );

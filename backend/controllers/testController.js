@@ -12,7 +12,7 @@ const getQuestionsByCompanyAndRound = (req, res) => {
   }
 
   db.query(
-    `SELECT id, question, options, answer AS correct_answer 
+    `SELECT id, question, options, answer AS correct_answer, sample_input AS sampleInput, sample_output AS sampleOutput 
      FROM questions 
      WHERE company_id = ? AND round = ?`,
     [companyId, round.toLowerCase()],
@@ -38,8 +38,11 @@ const getQuestionsByCompanyAndRound = (req, res) => {
           question: q.question,
           options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
           correctAnswer: q.correct_answer,
+          sampleInput: q.sampleInput, // Correctly mapped
+          sampleOutput: q.sampleOutput, // Correctly mapped
         }));
 
+        console.log('Formatted Questions:', formattedResult);
         res.json(formattedResult);
       } catch (parseError) {
         console.error('Options parsing error:', parseError);
