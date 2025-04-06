@@ -16,9 +16,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} /> {/* Default route is now Login */}
-        <Route path="/login" element={<Login />} /> {/* Default route is now Login */}
-        <Route path="/home" element={<Home />} /> {/* Home page moved to /home */}
+        <Route path="/" element={<Login />} /> 
+        <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} /> 
         <Route path="/company" element={<CompanySelection />} />
         <Route path="/placement-rounds/:id" element={<PlacementRounds />} />
         <Route path="/test/:companyId/:round" element={<TestPage />} />

@@ -3,7 +3,7 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import axios from 'axios';
 import './MockInterview.css';
 
-const MockInterview = () => {
+const MockInterview = ({ companyId = 1 }) => { // Default companyId to 1 or pass it as a prop
   const [questions, setQuestions] = useState([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [responses, setResponses] = useState([]);
@@ -24,7 +24,7 @@ const MockInterview = () => {
     const fetchQuestions = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`/api/tests/1/interview`); // Replace '1' with the actual companyId
+        const response = await axios.get(`/api/tests/${companyId}/interview`); // Use companyId
         console.log('Fetched questions:', response.data); // Log fetched questions
         setQuestions(response.data);
         setIsLoading(false);
@@ -44,7 +44,7 @@ const MockInterview = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, []);
+  }, [companyId]); // Add companyId as a dependency
 
   useEffect(() => {
     if (isListening) {

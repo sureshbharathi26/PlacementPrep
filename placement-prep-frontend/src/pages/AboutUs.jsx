@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaLightbulb, FaLaptopCode, FaUserTie, FaChartLine, FaHandshake, FaUsers } from 'react-icons/fa';
+import CountUp from 'react-countup'; // Import CountUp
+import { useInView } from 'react-intersection-observer'; // Import useInView
+import joel from '../assets/joel.jpeg';
+import suresh from '../assets/suresh.jpeg';
 
 const AboutUs = () => {
+  const [startCount, setStartCount] = useState(false);
+  const { ref: missionRef, inView } = useInView({
+    triggerOnce: true,
+    onChange: (inView) => {
+      if (inView) setStartCount(true);
+    },
+  });
+
   return (
     <>
       <Navbar />
@@ -23,7 +35,7 @@ const AboutUs = () => {
         </section>
 
         {/* Mission Section */}
-        <section className="py-5 bg-light">
+        <section className="py-5 bg-light" ref={missionRef}>
           <div className="container py-5">
             <div className="row align-items-center">
               <div className="col-lg-6 mb-4 mb-lg-0">
@@ -36,15 +48,21 @@ const AboutUs = () => {
                 </p>
                 <div className="d-flex mt-4">
                   <div className="pe-4 border-end">
-                    <h3 className="text-primary fw-bold">10K+</h3>
+                    <h3 className="text-primary fw-bold">
+                      {startCount && <CountUp start={0} end={10000} duration={2.5} separator="," />}+
+                    </h3>
                     <p className="text-muted">Students Helped</p>
                   </div>
                   <div className="px-4 border-end">
-                    <h3 className="text-primary fw-bold">200+</h3>
+                    <h3 className="text-primary fw-bold">
+                      {startCount && <CountUp start={0} end={200} duration={2.5} />}+
+                    </h3>
                     <p className="text-muted">Companies Covered</p>
                   </div>
                   <div className="ps-4">
-                    <h3 className="text-primary fw-bold">95%</h3>
+                    <h3 className="text-primary fw-bold">
+                      {startCount && <CountUp start={0} end={95} duration={2.5} />}%
+                    </h3>
                     <p className="text-muted">Satisfaction Rate</p>
                   </div>
                 </div>
@@ -187,42 +205,30 @@ const AboutUs = () => {
             <div className="text-center mb-5">
               <h2 className="fw-bold display-5 mb-3">Our Team</h2>
               <p className="lead text-muted mx-auto" style={{maxWidth: '700px'}}>
-                Industry experts and educators dedicated to your success
+                Web Devoloper and App developer
               </p>
             </div>
-            <div className="row g-4">
+            <div className="row g-4 justify-content-center">
               <div className="col-md-4">
                 <div className="card border-0 shadow-sm h-100">
-                  <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" className="card-img-top" alt="Team member" />
+                  <img src={joel} className="card-img-top" alt="Team member" />
                   <div className="card-body text-center">
-                    <h5 className="fw-bold mb-1">Rajesh Kumar</h5>
-                    <p className="text-muted mb-3">Founder & CEO</p>
+                    <h5 className="fw-bold mb-1">Joel Jones J </h5>
+                    <p className="text-muted mb-3">App Developer</p>
                     <p className="card-text">
-                      Former Google engineer with 10+ years of experience in technical hiring and candidate evaluation.
+                      3rd year CSE
                     </p>
                   </div>
                 </div>
               </div>
               <div className="col-md-4">
                 <div className="card border-0 shadow-sm h-100">
-                  <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" className="card-img-top" alt="Team member" />
+                  <img src={suresh} className="card-img-top" alt="Team member" />
                   <div className="card-body text-center">
-                    <h5 className="fw-bold mb-1">Priya Sharma</h5>
-                    <p className="text-muted mb-3">Head of Curriculum</p>
+                    <h5 className="fw-bold mb-1">Suresh Bharathi B</h5>
+                    <p className="text-muted mb-3">Web Developer</p>
                     <p className="card-text">
-                      Education specialist with expertise in creating effective technical learning pathways.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="card border-0 shadow-sm h-100">
-                  <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" className="card-img-top" alt="Team member" />
-                  <div className="card-body text-center">
-                    <h5 className="fw-bold mb-1">Amit Patel</h5>
-                    <p className="text-muted mb-3">Product Lead</p>
-                    <p className="card-text">
-                      Tech entrepreneur focused on building intuitive platforms that enhance learning outcomes.
+                      3rd year CSE
                     </p>
                   </div>
                 </div>
