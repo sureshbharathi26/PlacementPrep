@@ -127,6 +127,9 @@ const TestPage = () => {
               <p className="mb-0">
                 <strong>Time Remaining:</strong> {formatTime(timer)}
               </p>
+              <p className="mb-0">
+                <strong>Question:</strong> {currentQuestionIndex + 1} of {questions.length}
+              </p> {/* Added display for the number of questions */}
               <div>
                 <button className="btn btn-secondary me-2" onClick={handleBackToRounds}>
                   Back
@@ -191,6 +194,9 @@ const TestPage = () => {
           <div className="text-center">
             <p className="mb-3">
               <strong>Round:</strong> {round.charAt(0).toUpperCase() + round.slice(1)}
+            </p>
+            <p className="mb-4">
+              <strong>Total Questions:</strong> {questions.length} {/* Added display for total questions */}
             </p>
             <p className="mb-4">
               <strong>Duration:</strong> 15 minutes

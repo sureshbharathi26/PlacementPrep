@@ -17,7 +17,11 @@ const Login = () => {
     try {
       const response = await authService.login({ email, password });
       dispatch(login(response));
-      navigate('/home');
+      if (response.user.role === 'admin') {
+        navigate('/admin'); // Redirect to Admin page for admin users
+      } else {
+        navigate('/home'); // Redirect to Home page for regular users
+      }
     } catch (error) {
       console.error('Login failed:', error.response?.data?.error || error.message);
       alert(error.response?.data?.error || 'Login failed. Please try again.');

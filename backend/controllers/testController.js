@@ -11,11 +11,14 @@ const getQuestionsByCompanyAndRound = (req, res) => {
     });
   }
 
+  // Log the query to debug
+  console.log('Executing query with:', { companyId, round: round.toLowerCase() });
+
   db.query(
-    `SELECT id, question, options, answer AS correct_answer, sample_input AS sampleInput, sample_output AS sampleOutput 
+    `SELECT id, question, options, answer AS correctAnswer, sample_input AS sampleInput, sample_output AS sampleOutput 
      FROM questions 
      WHERE company_id = ? AND round = ?`,
-    [companyId, round.toLowerCase()],
+    [companyId, round.toLowerCase()], // Ensure round is case-insensitive
     (err, result) => {
       if (err) {
         console.error('Database error:', err);
@@ -25,7 +28,11 @@ const getQuestionsByCompanyAndRound = (req, res) => {
         });
       }
 
+      // Log the result to debug
+      console.log('Query result:', result);
+
       if (!result || result.length === 0) {
+        console.warn('No questions found for the specified parameters:', { companyId, round });
         return res.status(404).json({
           message: 'No questions found for this round',
           params: { companyId, round },
@@ -33,16 +40,16 @@ const getQuestionsByCompanyAndRound = (req, res) => {
       }
 
       try {
-        const formattedResult = result.map((q) => ({
-          id: q.id,
-          question: q.question,
-          options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
-          correctAnswer: q.correct_answer,
-          sampleInput: q.sampleInput, // Correctly mapped
-          sampleOutput: q.sampleOutput, // Correctly mapped
-        }));
-
-        console.log('Formatted Questions:', formattedResult);
+        const formattedResult = Array.isArray(result)
+          ? result.map((q) => ({
+              id: q.id,
+              question: q.question,
+              options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+              correctAnswer: q.correctAnswer,
+              sampleInput: q.sampleInput, // Correctly mapped
+              sampleOutput: q.sampleOutput, // Correctly mapped
+            }))
+          : [];
         res.json(formattedResult);
       } catch (parseError) {
         console.error('Options parsing error:', parseError);

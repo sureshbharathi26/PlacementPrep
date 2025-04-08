@@ -30,9 +30,17 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    // Check for fixed admin credentials
+    if (email === 'admin@placementprep.com' && password === 'Admin@123') {
+      const token = jwt.sign({ id: 'admin', role: 'admin' }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+      });
+      return res.json({ token, user: { id: 'admin', name: 'Admin', email, role: 'admin' } });
+    }
+
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, result) => {
       if (err) {
-        console.error('Database error:', err); // Log database errors
+        console.error('Database error:', err);
         return res.status(500).json({ error: 'Internal server error' });
       }
 
@@ -46,10 +54,6 @@ const login = async (req, res) => {
         return res.status(400).json({ error: 'Invalid credentials' });
       }
 
-      if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET is not defined'); // Log missing JWT_SECRET
-        return res.status(500).json({ error: 'Internal server error' });
-      }
       const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
@@ -57,10 +61,9 @@ const login = async (req, res) => {
       res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     });
   } catch (error) {
-    console.error('Unexpected error:', error); // Log unexpected errors
+    console.error('Unexpected error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 module.exports = { register, login };

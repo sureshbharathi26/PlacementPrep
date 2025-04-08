@@ -16,61 +16,72 @@ const ManageAptitudeQuestions = () => {
     options: ['', '', '', ''],
     correctAnswer: '',
   });
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
 
   useEffect(() => {
-    fetchQuestions();
+    const fetchCompanies = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get('/api/companies', { // Assuming /api/companies fetches companies
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCompanies(response.data);
+      } catch (err) {
+        console.error('Failed to fetch companies:', err);
+        setError(err.response?.data?.error || 'Failed to fetch companies');
+      }
+    };
+
     fetchCompanies();
   }, []);
 
-  const fetchQuestions = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await axios.get('/api/admin/questions', {
-        headers: { Authorization: `Bearer ${token}` }, // Add Authorization header
-        params: { round: 'Aptitude' }
-      });
-      setQuestions(response.data);
-      setLoading(false);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch questions');
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      if (!selectedCompanyId) {
+        setQuestions([]);
+        return;
+      }
+      try {
+        setLoading(true);
+        setError(null);
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get('/api/admin/questions', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { companyId: selectedCompanyId, round: 'aptitude' },
+        });
+        console.log('Fetched aptitude questions:', response.data);
+        setQuestions(response.data);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Failed to fetch aptitude questions');
+        setQuestions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchCompanies = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await axios.get('/api/companies', {
-        headers: { Authorization: `Bearer ${token}` } // Add Authorization header
-      });
-      setCompanies(response.data);
-    } catch (err) {
-      console.error('Failed to fetch companies:', err);
-    }
-  };
+    fetchQuestions();
+  }, [selectedCompanyId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('authToken');
       const payload = {
-        ...formData,
-        round: 'Aptitude',
-        correctAnswer: parseInt(formData.correctAnswer)
+        companyId: formData.companyId,
+        round: 'aptitude',
+        question: formData.question,
+        options: formData.options,
+        answer: formData.correctAnswer, // Send the selected option value
       };
 
       if (currentQuestion) {
-        await axios.put(
-          `/api/admin/questions/${currentQuestion.id}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await axios.put(`/api/admin/questions/${currentQuestion.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       } else {
-        await axios.post(
-          '/api/admin/questions',
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await axios.post('/api/admin/questions', payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       }
 
       setShowModal(false);
@@ -85,7 +96,7 @@ const ManageAptitudeQuestions = () => {
       try {
         const token = localStorage.getItem('authToken');
         await axios.delete(`/api/admin/questions/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         fetchQuestions();
       } catch (err) {
@@ -99,18 +110,33 @@ const ManageAptitudeQuestions = () => {
 
   return (
     <div className="mt-4">
+      <div className="mb-3">
+        <Form.Label>Select Company:</Form.Label>
+        <Form.Select value={selectedCompanyId} onChange={(e) => setSelectedCompanyId(e.target.value)}>
+          <option value="">All Companies</option>
+          {companies.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </Form.Select>
+      </div>
+
       <div className="d-flex justify-content-between mb-3">
         <h3>Aptitude Questions</h3>
-        <Button variant="primary" onClick={() => {
-          setCurrentQuestion(null);
-          setFormData({
-            companyId: '',
-            question: '',
-            options: ['', '', '', ''],
-            correctAnswer: '',
-          });
-          setShowModal(true);
-        }}>
+        <Button
+          variant="primary"
+          onClick={() => {
+            setCurrentQuestion(null);
+            setFormData({
+              companyId: selectedCompanyId || '',
+              question: '',
+              options: ['', '', '', ''],
+              correctAnswer: '',
+            });
+            setShowModal(true);
+          }}
+        >
           Add New Question
         </Button>
       </div>
@@ -119,8 +145,9 @@ const ManageAptitudeQuestions = () => {
         <thead>
           <tr>
             <th>#</th>
-            <th>Company</th>
             <th>Question</th>
+            <th>Options</th>
+            <th>Correct Answer</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -128,19 +155,31 @@ const ManageAptitudeQuestions = () => {
           {questions.map((q, index) => (
             <tr key={q.id}>
               <td>{index + 1}</td>
-              <td>{q.company_name || 'N/A'}</td>
               <td>{q.question}</td>
               <td>
-                <Button variant="info" size="sm" className="me-2" onClick={() => {
-                  setCurrentQuestion(q);
-                  setFormData({
-                    companyId: q.company_id,
-                    question: q.question,
-                    options: JSON.parse(q.options),
-                    correctAnswer: q.answer.toString(),
-                  });
-                  setShowModal(true);
-                }}>
+                <ul>
+                  {JSON.parse(q.options).map((option, i) => (
+                    <li key={i}>{option}</li>
+                  ))}
+                </ul>
+              </td>
+              <td>{q.correct_answer}</td>
+              <td>
+                <Button
+                  variant="info"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => {
+                    setCurrentQuestion(q);
+                    setFormData({
+                      companyId: q.company_id,
+                      question: q.question,
+                      options: JSON.parse(q.options),
+                      correctAnswer: q.correct_answer,
+                    });
+                    setShowModal(true);
+                  }}
+                >
                   Edit
                 </Button>
                 <Button variant="danger" size="sm" onClick={() => handleDelete(q.id)}>
@@ -154,7 +193,7 @@ const ManageAptitudeQuestions = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{currentQuestion ? 'Edit' : 'Add'} Question</Modal.Title>
+          <Modal.Title>{currentQuestion ? 'Edit' : 'Add'} Aptitude Question</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
@@ -163,12 +202,14 @@ const ManageAptitudeQuestions = () => {
               <Form.Select
                 name="companyId"
                 value={formData.companyId}
-                onChange={(e) => setFormData({...formData, companyId: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
                 required
               >
                 <option value="">Select Company</option>
-                {companies.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </Form.Select>
             </Form.Group>
@@ -180,7 +221,7 @@ const ManageAptitudeQuestions = () => {
                 rows={3}
                 name="question"
                 value={formData.question}
-                onChange={(e) => setFormData({...formData, question: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                 required
               />
             </Form.Group>
@@ -194,7 +235,7 @@ const ManageAptitudeQuestions = () => {
                   onChange={(e) => {
                     const newOptions = [...formData.options];
                     newOptions[index] = e.target.value;
-                    setFormData({...formData, options: newOptions});
+                    setFormData({ ...formData, options: newOptions });
                   }}
                   required
                 />
@@ -202,18 +243,14 @@ const ManageAptitudeQuestions = () => {
             ))}
 
             <Form.Group className="mb-3">
-              <Form.Label>Correct Answer (Option Number)</Form.Label>
-              <Form.Select
+              <Form.Label>Correct Answer (Text)</Form.Label>
+              <Form.Control
+                type="text"
                 name="correctAnswer"
                 value={formData.correctAnswer}
-                onChange={(e) => setFormData({...formData, correctAnswer: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, correctAnswer: e.target.value })}
                 required
-              >
-                <option value="">Select Correct Option</option>
-                {formData.options.map((_, index) => (
-                  <option key={index} value={index}>{index + 1}</option>
-                ))}
-              </Form.Select>
+              />
             </Form.Group>
 
             <div className="d-flex justify-content-end">
