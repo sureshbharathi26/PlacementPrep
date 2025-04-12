@@ -7,7 +7,6 @@ import spinner from "../assets/Spinner.svg";
 import Navbar from "../components/Navbar";
 import { useDispatch } from "react-redux";
 import { fetchQuestions } from "../redux/testSlice";
-
 import "../pages/CodeCompiler.css";
 
 const apiKey = "d3e4ee7a9emsha45d05810b4c0f8p1cbe4ejsncb947d65b3e2";
@@ -20,7 +19,7 @@ function CodeCompiler() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [testStarted, setTestStarted] = useState(false);
-  const [timer, setTimer] = useState(45 * 60); // 45 minutes in seconds
+  const [timer, setTimer] = useState(45 * 60);
   const [userCode, setUserCode] = useState(``);
   const [userLanguage, setUserLanguage] = useState("java");
   const [userTheme, setUserTheme] = useState("vs-dark");
@@ -28,29 +27,35 @@ function CodeCompiler() {
   const [userInput, setUserInput] = useState("");
   const [userOutput, setUserOutput] = useState("");
   const [loading, setLoading] = useState(false);
-  const options = {
-    fontSize: fontSize,
-  };
+  const [correctQuestions, setCorrectQuestions] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  
+  const options = { fontSize };
 
   useEffect(() => {
     let interval;
     if (testStarted && timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      interval = setInterval(() => setTimer(prev => prev - 1), 1000);
     } else if (timer === 0) {
-      alert("Time's up! Submitting your code...");
-      navigate(`/results`, { state: { companyId, round: "coding" } });
+      navigate(`/results`, { 
+        state: { 
+          companyId, 
+          round: "coding",
+          score: correctQuestions.length,
+          totalQuestions: questions.length
+        } 
+      });
     }
     return () => clearInterval(interval);
-  }, [testStarted, timer, navigate, companyId]);
+  }, [testStarted, timer, navigate, companyId, correctQuestions, questions.length]);
 
   useEffect(() => {
     const fetchCodingQuestions = async () => {
       try {
         const result = await dispatch(fetchQuestions({ companyId, round: "coding" })).unwrap();
-        console.log("Fetched Questions:", result); // Debug log
         setQuestions(result);
       } catch (error) {
-        console.error("Error fetching questions:", error); // Debug log
+        console.error("Error fetching questions:", error);
       }
     };
     fetchCodingQuestions();
@@ -63,18 +68,23 @@ function CodeCompiler() {
   };
 
   function Compile() {
+    if (!userCode.trim()) {
+      setUserOutput("Please write some code before compiling.");
+      return;
+    }
+    
     setLoading(true);
+    setUserOutput("");
+    setShowSuccess(false);
+    
     let languageId;
-    if (userLanguage === "java") {
-      languageId = 62;
-    } else if (userLanguage === "c") {
-      languageId = 50;
-    } else if (userLanguage === "cpp") {
-      languageId = 54;
-    } else if (userLanguage === "python") {
-      languageId = 71;
-    } else if (userLanguage === "javascript") {
-      languageId = 63;
+    switch (userLanguage) {
+      case "java": languageId = 62; break;
+      case "c": languageId = 50; break;
+      case "cpp": languageId = 54; break;
+      case "python": languageId = 71; break;
+      case "javascript": languageId = 63; break;
+      default: languageId = 62;
     }
 
     const formData = {
@@ -82,6 +92,7 @@ function CodeCompiler() {
       source_code: btoa(userCode),
       stdin: btoa(userInput),
     };
+
     const options = {
       method: "POST",
       url: appURL,
@@ -98,80 +109,106 @@ function CodeCompiler() {
     };
 
     Axios.request(options)
-      .then(function response(response) {
+      .then(response => {
         const token = response.data.token;
         checkStatus(token);
       })
-      .catch((err) => {
-        let error = err.response ? err.response.data : err;
+      .catch(err => {
         setLoading(false);
-        console.log(error);
+        setUserOutput(err.response ? err.response.data : err.message);
       });
   }
 
   const checkStatus = async (token) => {
     const options = {
       method: "GET",
-      url: appURL + "/" + token,
-      params: {
-        base64_encoded: "true",
-        fields: "*",
-      },
+      url: `${appURL}/${token}`,
+      params: { base64_encoded: "true", fields: "*" },
       headers: {
         "X-RapidAPI-Key": apiKey,
         "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
       },
     };
+    
     try {
       let response = await Axios.request(options);
       let statusId = response.data.status?.id;
+      
       if (statusId === 1 || statusId === 2) {
-        setTimeout(() => {
-          checkStatus(token);
-        }, 2000);
+        setTimeout(() => checkStatus(token), 2000);
         return;
-      } else {
-        setLoading(false);
-        if (response.data.compile_output) {
-          setUserOutput(atob(response.data.compile_output));
-        } else if (response.data.stderr) {
-          setUserOutput(atob(response.data.stderr));
-        } else {
-          setUserOutput(atob(response.data.stdout));
-        }
       }
+      
+      setLoading(false);
+      let output = "";
+      
+      if (response.data.compile_output) {
+        output = atob(response.data.compile_output);
+      } else if (response.data.stderr) {
+        output = atob(response.data.stderr);
+      } else {
+        output = atob(response.data.stdout);
+      }
+      
+      setUserOutput(output);
+      validateOutput(output);
     } catch (err) {
-      console.log(err);
+      setLoading(false);
+      setUserOutput(err.message);
+    }
+  };
+
+  const validateOutput = (output) => {
+    if (!questions.length) return;
+    
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion.sampleOutput) return;
+    
+    const expectedOutput = currentQuestion.sampleOutput.toString().trim();
+    const actualOutput = output.toString().trim();
+    
+    if (actualOutput === expectedOutput && !correctQuestions.includes(currentQuestion.id)) {
+      setCorrectQuestions([...correctQuestions, currentQuestion.id]);
+      setShowSuccess(true);
     }
   };
 
   const handleEndTest = () => {
-    if (window.confirm("Are you sure you want to end the test?")) {
-      navigate(`/results`, { state: { companyId, round: "coding" } });
+    if (window.confirm(`End test? Solved ${correctQuestions.length}/${questions.length}`)) {
+      navigate(`/results`, { 
+        state: { 
+          companyId, 
+          round: "coding",
+          score: correctQuestions.length,
+          totalQuestions: questions.length,
+          correctQuestions
+        } 
+      });
     }
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-    }
-  };
-
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-    }
-  };
-
-  function clearOutput() {
+  const handleQuestionNavigation = (index) => {
+    setCurrentQuestionIndex(index);
     setUserOutput("");
-  }
+    setUserInput("");
+    setShowSuccess(false);
+  };
+
+  const clearOutput = () => {
+    setUserOutput("");
+    setShowSuccess(false);
+  };
+
+  const isCurrentQuestionCorrect = (questionId) => {
+    return correctQuestions.includes(questionId);
+  };
 
   if (!testStarted) {
     return (
       <div className="container mt-5 text-center">
         <h1>Coding Round</h1>
         <p>Duration: 45 minutes</p>
+        <p>Total Questions: {questions.length}</p>
         <button className="btn btn-primary btn-lg" onClick={() => setTestStarted(true)}>
           Start Test
         </button>
@@ -184,7 +221,10 @@ function CodeCompiler() {
       <Navbar />
       <div className="container mt-3">
         <div className="d-flex justify-content-between align-items-center">
-          <h4>Time Remaining: {formatTime(timer)}</h4>
+          <div>
+            <h4>Time Remaining: {formatTime(timer)}</h4>
+            <p className="mb-0">Progress: {correctQuestions.length}/{questions.length} correct</p>
+          </div>
           <button className="btn btn-danger" onClick={handleEndTest}>
             End Test
           </button>
@@ -198,6 +238,23 @@ function CodeCompiler() {
         fontSize={fontSize}
         setFontSize={setFontSize}
       />
+      
+      {showSuccess && (
+        <div className="container mt-3">
+          <div className="alert alert-success">
+            <strong>Congratulations!</strong> Your answer is correct!
+            {currentQuestionIndex < questions.length - 1 && (
+              <button 
+                className="btn btn-success ms-3"
+                onClick={() => handleQuestionNavigation(currentQuestionIndex + 1)}
+              >
+                Next Question
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="container mt-3">
         <div className="row">
           {/* Left Section: Questions */}
@@ -205,31 +262,44 @@ function CodeCompiler() {
             <div className="card shadow-sm" style={{ backgroundColor: "#f0f4f8", border: "1px solid #d1d9e6" }}>
               <div className="card-body">
                 <h4 className="card-title text-center mb-4" style={{ color: "#007bff" }}>Questions</h4>
+                
+                {/* Question Navigation Numbers */}
+                <div className="d-flex flex-wrap mb-3">
+                  {questions.map((q, index) => (
+                    <button
+                      key={q.id}
+                      className={`btn btn-sm m-1 ${isCurrentQuestionCorrect(q.id) ? 'btn-success' : 
+                        currentQuestionIndex === index ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleQuestionNavigation(index)}
+                      style={{ width: '40px', height: '40px' }}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+                
                 {questions.length > 0 ? (
                   <div className="question-box">
-                    <h5 className="mb-3" style={{ color: "#333" }}>Question {currentQuestionIndex + 1}:</h5>
-                    <p className="mb-4" style={{ color: "#555" }}>{questions[currentQuestionIndex].question}</p>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5 style={{ color: "#333" }}>
+                        Question {currentQuestionIndex + 1}
+                        {isCurrentQuestionCorrect(questions[currentQuestionIndex].id) && (
+                          <span className="ms-2 text-success">✓</span>
+                        )}
+                      </h5>
+                    </div>
+                    <p className="mb-4" style={{ color: "#555" }}>
+                      {questions[currentQuestionIndex].question}
+                    </p>
                     <div className="mt-3">
                       <h6>Sample Input:</h6>
-                      <pre>{questions[currentQuestionIndex].sampleInput || 'No sample input available'}</pre>
+                      <pre className="p-2 bg-light rounded">
+                        {questions[currentQuestionIndex].sampleInput || 'No sample input'}
+                      </pre>
                       <h6>Sample Output:</h6>
-                      <pre>{questions[currentQuestionIndex].sampleOutput || 'No sample output available'}</pre>
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <button
-                        className="btn btn-outline-primary"
-                        onClick={handlePreviousQuestion}
-                        disabled={currentQuestionIndex === 0}
-                      >
-                        Previous
-                      </button>
-                      <button
-                        className="btn btn-outline-primary"
-                        onClick={handleNextQuestion}
-                        disabled={currentQuestionIndex === questions.length - 1}
-                      >
-                        Next
-                      </button>
+                      <pre className="p-2 bg-light rounded">
+                        {questions[currentQuestionIndex].sampleOutput || 'No sample output'}
+                      </pre>
                     </div>
                   </div>
                 ) : (
@@ -242,62 +312,68 @@ function CodeCompiler() {
             </div>
           </div>
 
-          {/* Right Section: Code Editor with Input/Output */}
+          {/* Right Section: Code Editor */}
           <div className="col-md-8">
-            <div className="card shadow-sm mb-4" style={{ backgroundColor: "#f0f4f8", border: "1px solid #d1d9e6" }}>
+            <div className="card shadow-sm mb-4">
               <div className="card-body">
-                <h5 className="card-title text-center mb-3" style={{ color: "#007bff" }}>Code Editor</h5>
+                <h5 className="card-title text-center mb-3">Code Editor</h5>
                 <Editor
                   options={options}
                   width="100%"
                   height="300px"
                   theme={userTheme}
                   language={userLanguage}
-                  defaultLanguage="java"
-                  defaultValue="//Start Coding Here....."
-                  onChange={(value) => {
-                    setUserCode(value);
-                  }}
+                  defaultValue="// Start Coding Here..."
+                  onChange={setUserCode}
                 />
                 <div className="d-flex justify-content-between mt-3">
-                  <button className="btn btn-primary" style={{ backgroundColor: "#007bff", borderColor: "#0056b3" }} onClick={() => Compile()}>
-                    Run
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={Compile}
+                    disabled={loading}
+                  >
+                    {loading ? 'Running...' : 'Run'}
                   </button>
-                  <button className="btn btn-secondary" style={{ backgroundColor: "#6c757d", borderColor: "#5a6268" }} onClick={() => clearOutput()}>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={clearOutput}
+                  >
                     Clear
                   </button>
                 </div>
               </div>
             </div>
+            
             <div className="row">
-              {/* Input Box */}
               <div className="col-md-6">
-                <div className="card shadow-sm" style={{ backgroundColor: "#f0f4f8", border: "1px solid #d1d9e6" }}>
+                <div className="card shadow-sm">
                   <div className="card-body">
-                    <h5 className="card-title" style={{ color: "#007bff" }}>Input</h5>
+                    <h5 className="card-title">Input</h5>
                     <textarea
-                      id="code-input"
                       className="form-control"
                       rows="6"
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
                       placeholder="Enter input here..."
-                      style={{ backgroundColor: "#ffffff", color: "#333", border: "1px solid #d1d9e6" }}
-                    ></textarea>
+                    />
                   </div>
                 </div>
               </div>
-              {/* Output Box */}
+              
               <div className="col-md-6">
-                <div className="card shadow-sm" style={{ backgroundColor: "#f0f4f8", border: "1px solid #d1d9e6" }}>
+                <div className="card shadow-sm">
                   <div className="card-body">
-                    <h5 className="card-title" style={{ color: "#007bff" }}>Output</h5>
+                    <h5 className="card-title">Output</h5>
                     {loading ? (
                       <div className="d-flex justify-content-center align-items-center" style={{ height: "100px" }}>
                         <img src={spinner} alt="Loading..." />
                       </div>
                     ) : (
-                      <pre className="p-2" style={{ height: "150px", overflowY: "auto", backgroundColor: "#ffffff", color: "#333", border: "1px solid #d1d9e6" }}>
+                      <pre style={{ 
+                        height: "150px", 
+                        overflowY: "auto",
+                        whiteSpace: "pre-wrap"
+                      }}>
                         {userOutput || "Output will appear here..."}
                       </pre>
                     )}

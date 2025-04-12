@@ -1,10 +1,11 @@
 const express = require('express');
-const { getRoundStatus, updateRoundStatus } = require('../controllers/roundStatusController');
-const authMiddleware = require('../middlewares/authMiddleware');
-
 const router = express.Router();
+const { getRoundStatus, updateRoundStatus } = require('../controllers/roundStatusController');
 
-router.get('/', authMiddleware, getRoundStatus);
-router.post('/', authMiddleware, updateRoundStatus);
+// GET route to fetch round statuses
+router.get('/round-status', getRoundStatus);
+
+// POST route to insert/update round status
+router.post('/round-status', updateRoundStatus);
 
 module.exports = router;

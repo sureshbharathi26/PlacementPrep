@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, Tab, Table, Button, Modal, Form, Spinner, Alert } from 'react-bootstrap';
+import { Tabs, Tab, Table, Button, Modal, Form, Spinner, Alert, Card } from 'react-bootstrap';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import AnalysisChart from '../components/AnalysisChart';
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('aptitude');
+  const [activeTab, setActiveTab] = useState('companies');
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [companies, setCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState('');
   const [formData, setFormData] = useState({
     companyId: '',
     question: '',
@@ -21,24 +24,40 @@ const AdminPage = () => {
   });
   const [successMessage, setSuccessMessage] = useState('');
   const [companyFormData, setCompanyFormData] = useState({ name: '' });
+  const [analytics, setAnalytics] = useState(null);
 
+  // Fetch all initial data
   useEffect(() => {
-    const fetchCompanies = async () => {
+    const fetchInitialData = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await axios.get('/api/companies', {
+        
+        // Fetch companies
+        const companiesResponse = await axios.get('/api/companies', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCompanies(response.data);
+        setCompanies(companiesResponse.data);
+        
+        // Fetch analytics if on that tab
+        if (activeTab === 'analytics') {
+          const analyticsResponse = await axios.get('/api/admin/analytics', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setAnalytics(analyticsResponse.data);
+        }
       } catch (err) {
-        setError('Failed to fetch companies');
+        setError('Failed to fetch initial data');
       }
     };
-    fetchCompanies();
-  }, []);
+    
+    fetchInitialData();
+  }, [activeTab]);
 
+  // Fetch questions when company or tab changes
   useEffect(() => {
-    if (formData.companyId) fetchQuestions();
+    if (formData.companyId && (activeTab === 'aptitude' || activeTab === 'coding')) {
+      fetchQuestions();
+    }
   }, [activeTab, formData.companyId]);
 
   const fetchQuestions = async () => {
@@ -62,7 +81,9 @@ const AdminPage = () => {
 
       setQuestions(mappedQuestions);
     } catch (err) {
-      setError('Failed to fetch questions');
+      if (!successMessage) {
+        setError('Failed to fetch questions');
+      }
       setQuestions([]);
     } finally {
       setLoading(false);
@@ -72,6 +93,7 @@ const AdminPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
     try {
       const token = localStorage.getItem('authToken');
       const payload = {
@@ -98,7 +120,11 @@ const AdminPage = () => {
 
       setShowModal(false);
       resetForm();
-      fetchQuestions();
+      try {
+        await fetchQuestions();
+      } catch (fetchErr) {
+        console.error('Failed to refresh questions:', fetchErr);
+      }
     } catch (err) {
       setError('Failed to save question');
     }
@@ -106,12 +132,19 @@ const AdminPage = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this question?')) return;
+    setError(null);
+    setSuccessMessage(null);
     try {
       const token = localStorage.getItem('authToken');
       await axios.delete(`/api/admin/questions/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchQuestions();
+      setSuccessMessage('Question deleted successfully.');
+      try {
+        await fetchQuestions();
+      } catch (fetchErr) {
+        console.error('Failed to refresh questions:', fetchErr);
+      }
     } catch (err) {
       setError('Failed to delete question');
     }
@@ -128,7 +161,12 @@ const AdminPage = () => {
       });
       setSuccessMessage('Company added successfully.');
       setCompanyFormData({ name: '' });
-      fetchCompanies();
+      
+      // Refresh companies list
+      const response = await axios.get('/api/companies', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCompanies(response.data);
     } catch (err) {
       setError('Failed to add company');
     }
@@ -136,13 +174,15 @@ const AdminPage = () => {
 
   const handleDeleteCompany = async (id) => {
     if (!window.confirm('Are you sure you want to delete this company?')) return;
+    setError(null);
+    setSuccessMessage(null);
     try {
       const token = localStorage.getItem('authToken');
       await axios.delete(`/api/companies/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccessMessage('Company deleted successfully.');
-      setCompanies(companies.filter((company) => company.id !== id)); // Update state immediately
+      setCompanies(companies.filter((company) => company.id !== id));
     } catch (err) {
       setError('Failed to delete company');
     }
@@ -160,29 +200,128 @@ const AdminPage = () => {
     setCurrentQuestion(null);
   };
 
+  const UserAnalyticsTab = () => {
+    if (!analytics) return <Spinner animation="border" />;
+    
+    return (
+      <div>
+        <h4>User Participation Statistics</h4>
+        
+        <div className="row mb-4">
+          <div className="col-md-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>Total Users</Card.Title>
+                <Card.Text className="display-6">
+                  {analytics.totalUsers}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </div>
+          <div className="col-md-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>Active Today</Card.Title>
+                <Card.Text className="display-6">
+                  {analytics.activeToday}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </div>
+          <div className="col-md-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>Total Tests Taken</Card.Title>
+                <Card.Text className="display-6">
+                  {analytics.totalTests}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </div>
+          <div className="col-md-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>Avg. Score</Card.Title>
+                <Card.Text className="display-6">
+                  {analytics.averageScore || 'N/A'}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <Form.Group>
+            <Form.Label>Select Company for Detailed Analysis</Form.Label>
+            <Form.Select
+              value={selectedCompany}
+              onChange={(e) => setSelectedCompany(e.target.value)}
+            >
+              <option value="">All Companies</option>
+              {companies.map(company => (
+                <option key={company.id} value={company.id}>{company.name}</option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </div>
+
+        {selectedCompany && <AnalysisChart companyId={selectedCompany} />}
+
+        <h5 className="mt-4">Company-wise Participation</h5>
+        <div style={{ height: '400px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={analytics.companyStats}
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="totalParticipants" fill="#8884d8" name="Total" />
+              <Bar dataKey="aptitudeParticipants" fill="#82ca9d" name="Aptitude" />
+              <Bar dataKey="codingParticipants" fill="#ffc658" name="Coding" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <Table striped bordered hover className="mt-4">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Total Participants</th>
+              <th>Aptitude Tests</th>
+              <th>Coding Tests</th>
+              <th>Avg. Score</th>
+              <th>Completion Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {analytics.companyStats.map((company, index) => (
+              <tr key={index}>
+                <td>{company.name}</td>
+                <td>{company.totalParticipants}</td>
+                <td>{company.aptitudeParticipants}</td>
+                <td>{company.codingParticipants}</td>
+                <td>{company.averageScore || 'N/A'}</td>
+                <td>{company.completionRate}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    );
+  };
+
   return (
     <>
       <Navbar />
       <div className="container mt-4">
         <h2>Admin Dashboard</h2>
 
-        {/* Show only one alert at a time */}
         {error && <Alert variant="danger" onClose={() => setError(null)} dismissible>{error}</Alert>}
         {!error && successMessage && <Alert variant="success" onClose={() => setSuccessMessage(null)} dismissible>{successMessage}</Alert>}
-
-        <Form.Group className="mb-3">
-          <Form.Label>Select Company</Form.Label>
-          <Form.Select
-            value={formData.companyId}
-            onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-            required
-          >
-            <option value="">Select a company</option>
-            {companies.map(company => (
-              <option key={company.id} value={company.id}>{company.name}</option>
-            ))}
-          </Form.Select>
-        </Form.Group>
 
         <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
           <Tab eventKey="companies" title="Manage Companies">
@@ -231,6 +370,20 @@ const AdminPage = () => {
 
           {['aptitude', 'coding'].map((tab) => (
             <Tab eventKey={tab} title={`${tab.charAt(0).toUpperCase() + tab.slice(1)} Questions`} key={tab}>
+              <Form.Group className="mb-3">
+                <Form.Label>Select Company</Form.Label>
+                <Form.Select
+                  value={formData.companyId}
+                  onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                  required
+                >
+                  <option value="">Select a company</option>
+                  {companies.map(company => (
+                    <option key={company.id} value={company.id}>{company.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
               <div className="d-flex justify-content-end mb-3">
                 <Button
                   variant="primary"
@@ -300,6 +453,10 @@ const AdminPage = () => {
               )}
             </Tab>
           ))}
+
+          <Tab eventKey="analytics" title="User Analytics">
+            <UserAnalyticsTab />
+          </Tab>
         </Tabs>
 
         <Modal show={showModal} onHide={() => { setShowModal(false); resetForm(); }} size="lg">

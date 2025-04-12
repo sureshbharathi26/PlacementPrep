@@ -96,6 +96,36 @@ const deleteQuestion = (req, res) => {
     res.json({ message: 'Question deleted successfully.' });
   });
 };
+// Login analysis (day, week, month)
+const getLoginAnalysis = (req, res) => {
+  const { timeRange } = req.query;
+
+  let dateCondition;
+  switch (timeRange) {
+    case 'day':
+      dateCondition = "login_time >= NOW() - INTERVAL 1 DAY";
+      break;
+    case 'week':
+      dateCondition = "login_time >= NOW() - INTERVAL 1 WEEK";
+      break;
+    case 'month':
+      dateCondition = "login_time >= NOW() - INTERVAL 1 MONTH";
+      break;
+    default:
+      return res.status(400).json({ error: 'Invalid time range' });
+  }
+
+  db.query(
+    `SELECT COUNT(*) AS loginCount FROM logins WHERE ${dateCondition}`,
+    (err, result) => {
+      if (err) {
+        console.error('Database error (getLoginAnalysis):', err);
+        return res.status(500).json({ error: 'Failed to fetch login data.' });
+      }
+      res.json({ loginCount: result[0].loginCount });
+    }
+  );
+};
 
 module.exports = {
   getQuestions,

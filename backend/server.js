@@ -25,7 +25,7 @@ app.use('/api/tests', testRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/round-status', roundStatusRoutes); 
 app.use('/api/admin', adminRoutes); 
-
+app.use('/api', roundStatusRoutes);
 
 app.get('/api/tests/:companyId/:round', authMiddleware, (req, res, next) => {
   const { round } = req.params;
